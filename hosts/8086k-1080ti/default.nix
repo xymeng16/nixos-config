@@ -7,7 +7,7 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      ./hosts/8086k-1080ti/hardware-configuration.nix
+      ./hardware-configuration.nix
     ];
 
   # Bootloader.
