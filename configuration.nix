@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... } :
 
 {
   imports =
@@ -15,7 +15,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
   
 # Enable OpenGL
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
   };
 
@@ -29,7 +29,7 @@
 
     # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
     # Enable this if you have graphical corruption issues or application crashes after waking
-    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead 
+    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead  
     # of just the bare essentials.
     powerManagement.enable = false;
 
@@ -74,9 +74,59 @@
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
-  # Enable the GNOME Desktop Environment.
+  # # Enable the GNOME Desktop Environment.
+  # nixpkgs.overlays = [
+  #   (import ./overlays/mutterX11.nix)
+  # ];
+  # nixpkgs.overlays = [
+  #   (
+  #     final: prev: {
+  #       # elements of pkgs.gnome must be taken from gfinal and gprev
+  #       gnome = prev.gnome.overrideScope (gfinal: gprev: {
+  #         mutter = gprev.mutter.overrideAttrs (oldAttrs: {
+  #           # version = oldAttrs.version + "-patched";
+  #           patches = (oldAttrs.patches or []) ++ [
+  #             # https://salsa.debian.org/gnome-team/mutter/-/blob/ubuntu/master/debian/patches/x11-Add-support-for-fractional-scaling-using-Randr.patch
+  #             (prev.fetchpatch {
+  #               url = "https://raw.githubusercontent.com/puxplaying/mutter-x11-scaling/7aa432d4366fdd5a2687a78848b25da4f8ab5c68/x11-Add-support-for-fractional-scaling-using-Randr.patch";
+  #               hash = "13xx5pk29307k6075j087hp8lfpklfbm7i1xlr753ia6hd2lizsl";
+  #             })
+  #           #   # (prev.fetchpatch {
+  #           #   #   url = "https://raw.githubusercontent.com/puxplaying/mutter-x11-scaling/64f7d7fb106b7efb5dfb3f86c3bcf9a173ee3c5e/Support-Dynamic-triple-double-buffering.patch";
+  #           #   #   hash = "";
+  #           #   # })
+  #           ];
+  #         });
+  #       });
+  #     }
+  #   )
+  # ];
+
+  # nixpkgs.overlays = [
+  #   (final: prev: {
+  #     gnome = prev.gnome.overrideScope (gfinal: gprev: {
+  #       mutter = gprev.mutter.overrideAttrs (oldAttrs: {
+  #         version = oldAttrs.version + "-patched";
+  #       });
+  #     });
+  #   })
+  # ];
+
+  # nixpkgs.overlays = [
+  #   (final: prev: {
+  #     hello = prev.hello.overrideAttrs (oldAttrs: {
+  #       name = "hello-patched";
+  #     });
+  #   })
+  # ];
+
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
+
+  # Enable KDE
+  # services.displayManager.sddm.enable = true;
+  # services.displayManager.sddm.wayland.enable = true;
+  # services.desktopManager.plasma6.enable = true;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -129,16 +179,29 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  # $ nix search wget 
   environment.systemPackages = with pkgs; [
      neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
      wget
      curl         
      git
      tailscale
+
+     inputs.wezterm.packages.${pkgs.system}.default # workaround for https://github.com/wez/wezterm/issues/5990
+    # (import
+    #   (builtins.fetchGit {
+    #     url = "github:wez/wezterm/main?dir=nix";
+    #     ref = "main";
+    #     rev = "a2f2c07a29f5c98f6736cde0c86b24887f9fd48a"; 
+    #   })
+    #   { inherit system; }).wezterm  
   ];
   
   environment.variables.EDITOR = "neovim";
+
+  fonts.packages = with pkgs; [
+    (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "IBMPlexMono"]; })
+  ];  
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

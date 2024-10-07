@@ -31,7 +31,7 @@
   # 建议将所有 GUI 软件，以及与 OS 关系不大的 CLI 软件，都通过 home.packages 安装
   home.packages = with pkgs;[
     # 如下是我常用的一些命令行工具，你可以根据自己的需要进行增删
-    neofetch
+    fastfetch
     nnn # terminal file manager
 
     # archives
@@ -93,6 +93,23 @@
     ethtool
     pciutils # lspci
     usbutils # lsusb
+
+    # instant messages
+    telegram-desktop
+    wechat-uos # license is required
+
+    # browser
+    google-chrome
+
+    # development
+    vscode-fhs
+    jetbrains.rust-rover
+    jetbrains.goland
+  ];
+
+  imports = [
+    ./dev
+    ./terminal
   ];
 
   # git 相关配置
@@ -132,9 +149,16 @@
   programs.bash = {
     enable = true;
     enableCompletion = true;
+    initExtra = ''
+      if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
+      then
+        shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=""
+        exec ${pkgs.fish}/bin/fish $LOGIN_OPTION
+      fi
+    '';
     # TODO 在这里添加你的自定义 bashrc 内容
     bashrcExtra = ''
-      export PATH="$PATH:$HOME/bin:$HOME/.local/bin:$HOME/go/bin"
+      export PATH="$PATH:$HOME/bin:$HOME/.local/bin:$HOME/go/bin" 
     '';
 
     # TODO 设置一些别名方便使用，你可以根据自己的需要进行增删
