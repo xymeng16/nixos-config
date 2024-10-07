@@ -105,6 +105,9 @@
     vscode-fhs
     jetbrains.rust-rover
     jetbrains.goland
+
+    # research
+    zotero_7
   ];
 
   imports = [

@@ -181,13 +181,13 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget 
   environment.systemPackages = with pkgs; [
-     neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-     wget
-     curl         
-     git
-     tailscale
-
-     inputs.wezterm.packages.${pkgs.system}.default # workaround for https://github.com/wez/wezterm/issues/5990
+    neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    wget
+    curl         
+    git
+    tailscale
+    nixos-generators
+    inputs.wezterm.packages.${pkgs.system}.default # workaround for https://github.com/wez/wezterm/issues/5990
     # (import
     #   (builtins.fetchGit {
     #     url = "github:wez/wezterm/main?dir=nix";
